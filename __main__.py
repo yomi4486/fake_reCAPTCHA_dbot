@@ -32,7 +32,7 @@ async def on_message(message:discord.Message):
         if message.attachments:
             title = message.content.replace(f"<@{APPLICATION_ID}> ","").replace(f"<@{APPLICATION_ID}>","")
             if len(title) == 0:
-                await message.reply("テーマが指定されていません！",silent=True,delete_after=5)
+                await message.reply("テーマが指定されていません！\n使い方を知りたい場合は、`/help`を実行してください！",silent=True,delete_after=5)
             files = message.attachments
             
             await create_image.image_process(base_text=title,files=files)
