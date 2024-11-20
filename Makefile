@@ -3,4 +3,3 @@ run:
 
 build:
 	@pip install -r requirements.txt
-	@mkdir img

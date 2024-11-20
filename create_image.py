@@ -2,6 +2,8 @@ from PIL import Image,ImageDraw,ImageFont
 import glob,sys
 import discord,json,os
 
+if not os.path.exists("./img"):
+    os.mkdir("./img")
 
 def crop_max_square(pil_img):
     """
