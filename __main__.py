@@ -1,56 +1,40 @@
-from PIL import Image,ImageDraw,ImageFont
-import glob,sys
+import discord,create_image,os
+from discord import app_commands
+from os.path import join, dirname
+from dotenv import load_dotenv
+load_dotenv(verbose=True)
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
 
-def crop_max_square(pil_img):
-    """
-    画像の一番長い辺を元に正方形にクロップする関数
-    Args:
-        pil_img(ImageFile | Image): ベースとなる画像（Image.openなどの返り値）
-    """
-    def crop_center(pil_img:Image.Image, crop_width, crop_height)-> Image.Image:
-        img_width, img_height = pil_img.size
-        return pil_img.crop(((img_width - crop_width) // 2,
-                            (img_height - crop_height) // 2,
-                            (img_width + crop_width) // 2,
-                            (img_height + crop_height) // 2))
+TOKEN = os.environ.get("TOKEN")
+APPLICATION_ID = os.environ.get("ID")
 
-    return crop_center(pil_img, min(pil_img.size), min(pil_img.size))
+client = discord.Client(intents = discord.Intents.all())
+tree = app_commands.CommandTree(client)
 
-def image_process(base_text:str):
-    if not "\n" in base_text:
-        base_text = f"{base_text[:14]}\n{base_text[14:]}"
-    basic_font = 'C:/Windows/Fonts/BIZ-UDGothicB.ttc'
-    img = Image.open('main.png')
-    font = ImageFont.truetype('C:/Windows/Fonts/BIZ-UDGothicB.ttc', 60) # フォントは自分で探してクレメンス宇ううううううううううううううううううううううううううううううううううううううううううううううううううううううううはんｒふぃうあｈんうぇるいがんれｗぎうあｒねういんごうあねｈふいあえｒがうんｇヴぃあえるｈんがれ
-    draw = ImageDraw.Draw(img)
+@client.event
+async def on_ready():
+    # この関数はBotの起動準備が終わった際に呼び出されます
+    print(f'Ready: {client.user}')
+    await tree.sync()#スラッシュコマンドを同期
 
-    draw.text(
-    (60, 160),
-    base_text,
-    font=ImageFont.truetype(basic_font, 60),
-    fill='white',
-    stroke_width=1,
-    stroke_fill='white')
-    xy = [
-        (23,310),(412,310),(803,310),
-        (23,699),(412,699),(803,699),
-        (23,1088),(412,1088),(803,1088)
-    ]
-    img_list = []
-    for i in glob.glob("./img/*"):
-        if not len(img_list) >= 9:
-            img_list.append(i)
-        else:
-            break
-    for i in range(len(img_list)):
-        tmp_img = Image.open(img_list[i])
-        tmp_img = crop_max_square(tmp_img)
-        tmp_img = tmp_img.resize((367,367))
-        img.paste(tmp_img,xy[i])
-    img.save("result.png")
-if __name__ == "__main__":
-    if len(glob.glob("./img/*")) ==0:
-        print("imgフォルダに画像が一枚も含まれていません。")
-        sys.exit()
-    text = input("テーマを入力 > ")
-    image_process(base_text=text)
+@tree.command(name="help",description="Botの説明を表示します。")
+async def test_command(interaction: discord.Interaction):
+    embed = discord.Embed(title="使用方法",description="「@mention タイトル」というメッセージに最大9個の画像を添付してください。")
+    embed.add_field(name='概要', inline=False ,value='')
+    embed.add_field(name='コマンド', inline=False ,value='')
+    embed.add_field(name='`/help`', value='Botの説明を表示します。')
+    await interaction.response.send_message(embed=embed,ephemeral=True)
+
+@client.event
+async def on_message(message:discord.Message):
+    if f"<@{APPLICATION_ID}>" in message.content:
+        title = message.content.replace(f"<@{APPLICATION_ID}> ","").replace(f"<@{APPLICATION_ID}>","")
+        files = message.attachments
+        
+        await create_image.image_process(base_text=title,files=files)
+
+        await message.reply(file=discord.File('./result.png'))
+        return
+
+client.run(TOKEN)
