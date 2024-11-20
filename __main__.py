@@ -29,12 +29,17 @@ async def test_command(interaction: discord.Interaction):
 @client.event
 async def on_message(message:discord.Message):
     if f"<@{APPLICATION_ID}>" in message.content:
-        title = message.content.replace(f"<@{APPLICATION_ID}> ","").replace(f"<@{APPLICATION_ID}>","")
-        files = message.attachments
-        
-        await create_image.image_process(base_text=title,files=files)
-
-        await message.reply(file=discord.File('./result.png'))
-        return
+        if message.attachments:
+            title = message.content.replace(f"<@{APPLICATION_ID}> ","").replace(f"<@{APPLICATION_ID}>","")
+            if len(title) == 0:
+                await message.reply("テーマが指定されていません！",silent=True,delete_after=5)
+            files = message.attachments
+            
+            await create_image.image_process(base_text=title,files=files)
+            msg = await message.reply(content="<a:load:1308731656038907924> Creating...")
+            await msg.edit(content="",attachments=[discord.File('./result.png')])
+            return
+        else:
+            await message.reply("画像が1枚も添付されていません！",silent=True,delete_after=5)
 
 client.run(TOKEN)

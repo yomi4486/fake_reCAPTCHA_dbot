@@ -1,6 +1,6 @@
 from PIL import Image,ImageDraw,ImageFont
 import glob,sys
-import discord,json
+import discord,json,os
 
 
 def crop_max_square(pil_img):
@@ -55,5 +55,9 @@ async def image_process(base_text:str,files:list):
             img.paste(tmp_img,xy[i])
         except Exception as e:
             print(e)
-            return
+    for i in glob.glob("./img/*"):
+        try:
+            os.remove(i)
+        except:
+            pass
     img.save("result.png")
