@@ -30,7 +30,7 @@ async def test_command(interaction: discord.Interaction):
 async def on_message(message:discord.Message):
     if f"<@{APPLICATION_ID}>" in message.content:
         if message.attachments:
-            title = message.content.replace(f"<@{APPLICATION_ID}> ","").replace(f"<@{APPLICATION_ID}>","")
+            title = message.content.replace(f"<@{APPLICATION_ID}> ","").replace(f"<@{APPLICATION_ID}>","").replace("\n","")
             if len(title) == 0:
                 await message.reply("テーマが指定されていません！\n使い方を知りたい場合は、`/help`を実行してください！",silent=True,delete_after=5)
             files = message.attachments
